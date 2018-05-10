@@ -1,22 +1,30 @@
+
+// tslint:disable-next-line:import-blacklist
+import {throwError as observableThrowError,  Observable } from 'rxjs';
+
+import {catchError} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { IEmployee } from './employee';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/catch'
-import 'rxjs/add/observable/throw'
 
-@Injectable()
+
+
+@Injectable(
+  {
+    providedIn: 'root'
+  }
+)
 export class EmployeeService {
 
-  errorHandler(error: HttpErrorResponse) {
-    return Observable.throw(error.message || "Server Error");
-  }
   private employeesUrl = 'assets/data/employees.json';
+
+  errorHandler(error: HttpErrorResponse) {
+    return observableThrowError(error.message || 'Server Error');
+  }
 
   constructor(private http: HttpClient) { }
 
-  getEmployees():Observable<IEmployee[]> {
-    return this.http.get<IEmployee[]>(this.employeesUrl).catch(this.errorHandler);
+  getEmployees(): Observable<IEmployee[]> {
+    return this.http.get<IEmployee[]>(this.employeesUrl).pipe(catchError(this.errorHandler));
   }
-
 }
